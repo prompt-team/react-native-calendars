@@ -23,10 +23,12 @@ const commons = require('./commons');
 const UPDATE_SOURCES = commons.UPDATE_SOURCES;
 const POSITIONS = {
   CLOSED: 'closed',
-  OPEN: 'open'
+  OPEN: 'open',
+  MIN: 'min'
 };
 const SPEED = 20;
 const BOUNCINESS = 6;
+const MIN_HEIGHT = 50;
 const CLOSED_HEIGHT = 120; // header + 1 week
 const WEEK_HEIGHT = 46;
 const KNOB_CONTAINER_HEIGHT = 20;
@@ -44,7 +46,7 @@ class ExpandableCalendar extends Component {
 
   static propTypes = {
     ...CalendarList.propTypes,
-    /** the initial position of the calendar ('open' or 'closed') */
+    /** the initial position of the calendar ('open' or 'closed' or 'min') */
     initialPosition: PropTypes.oneOf(_.values(POSITIONS)),
     /** an option to disable the pan gesture and disable the opening and closing of the calendar (initialPosition will persist)*/
     disablePan: PropTypes.bool,
@@ -60,7 +62,7 @@ class ExpandableCalendar extends Component {
 
   static defaultProps = {
     horizontal: true,
-    initialPosition: POSITIONS.CLOSED,
+    initialPosition: POSITIONS.OPEN,
     firstDay: 0,
     leftArrowImageSource: require('../calendar/img/previous.png'),
     rightArrowImageSource: require('../calendar/img/next.png'),
@@ -74,6 +76,7 @@ class ExpandableCalendar extends Component {
 
     this.style = styleConstructor(props.theme);
     this.closedHeight = CLOSED_HEIGHT + (props.hideKnob ? 0 : KNOB_CONTAINER_HEIGHT);
+    this.minHeight = MIN_HEIGHT + (props.hideKnob ? 0 : KNOB_CONTAINER_HEIGHT);
     this.numberOfWeeks = this.getNumberOfWeeksInMonth(XDate(this.props.context.date));
     this.openHeight = this.getOpenHeight();
     
@@ -237,7 +240,7 @@ class ExpandableCalendar extends Component {
       // disable pan detection when vertical calendar is open to allow calendar scroll
       return false;
     }
-    if (this.state.position === POSITIONS.CLOSED && gestureState.dy < 0) {
+    if (this.state.position === POSITIONS.MIN && gestureState.dy < 0) {
       // disable pan detection to limit to closed height
       return false;
     }
@@ -248,7 +251,7 @@ class ExpandableCalendar extends Component {
   };
   handlePanResponderMove = (e, gestureState) => {
     // limit min height to closed height
-    this._wrapperStyles.style.height = Math.max(this.closedHeight, this._height + gestureState.dy);
+    this._wrapperStyles.style.height = Math.max(this.minHeight, this._height + gestureState.dy);
 
     if (!this.props.horizontal) {
       // vertical CalenderList header
@@ -273,9 +276,11 @@ class ExpandableCalendar extends Component {
     if (!this.props.disablePan) {  
       const {deltaY} = this.state;
       const threshold = this.openHeight / 1.75;
+      const thresholdLower = this.closedHeight / 1.25;
 
       let isOpen = this._height >= threshold;
-      const newValue = isOpen ? this.openHeight : this.closedHeight;
+      let isMin = this._height < thresholdLower;
+      const newValue = isOpen ? this.openHeight : isMin ? this.minHeight : this.closedHeight;
       
       deltaY.setValue(this._height); // set the start position for the animated value
       this._height = toValue || newValue;
@@ -301,7 +306,8 @@ class ExpandableCalendar extends Component {
 
   setPosition() {
     const isClosed = this._height === this.closedHeight;
-    this.setState({position: isClosed ? POSITIONS.CLOSED : POSITIONS.OPEN});
+    const isMin = this._height === this.minHeight;
+    this.setState({position: isClosed ? POSITIONS.CLOSED : isMin ? POSITIONS.MIN : POSITIONS.OPEN});
   }
   
   resetWeekCalendarOpacity(isOpen) {
