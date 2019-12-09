@@ -285,6 +285,7 @@ class ExpandableCalendar extends Component {
       deltaY.setValue(this._height); // set the start position for the animated value
       this._height = toValue || newValue;
       isOpen = this._height >= threshold; // re-check after this._height was set
+      isMin = this._height < thresholdLower;
 
       Animated.spring(deltaY, {
         toValue: this._height,
@@ -294,7 +295,7 @@ class ExpandableCalendar extends Component {
 
       this.setPosition();
       this.closeHeader(isOpen);
-      this.resetWeekCalendarOpacity(isOpen);
+      this.resetWeekCalendarOpacity(isOpen || isMin);
     }
   }
 
