@@ -259,13 +259,13 @@ class ExpandableCalendar extends Component {
     } else {
       // horizontal Week view
       if (this.state.position === POSITIONS.CLOSED) {
-        if (this._wrapperStyles.style.height < (this.closedHeight - WEEK_HEIGHT) && gestureState.dy < 0) {
+        if (this._wrapperStyles.style.height < (this.closedHeight - WEEK_HEIGHT + KNOB_CONTAINER_HEIGHT) && gestureState.dy < 0) {
           this._weekCalendarStyles.style.opacity = 0;
         } else {
           this._weekCalendarStyles.style.opacity = Math.min(1, Math.max(1 - gestureState.dy / 100, 0));
         }
       } else if (this.state.position === POSITIONS.MIN) {
-        this._weekCalendarStyles.style.opacity = this._wrapperStyles.style.height < (this.closedHeight - WEEK_HEIGHT) ? 0 : this._wrapperStyles.style.height <= this.closedHeight ? 1 : Math.min(1, Math.max(1 - gestureState.dy / 100, 0));
+        this._weekCalendarStyles.style.opacity = this._wrapperStyles.style.height < (this.closedHeight - WEEK_HEIGHT + KNOB_CONTAINER_HEIGHT) ? 0 : this._wrapperStyles.style.height <= this.closedHeight ? 1 : Math.min(1, Math.max(1 - gestureState.dy / 100, 0));
       }
     }
 
