@@ -1,8 +1,10 @@
 import _ from 'lodash';
 import React, {Component} from 'react';
-import {SectionList, Text} from 'react-native';
+import {Text, View} from 'react-native';
+import {SectionList} from 'react-native-two-way-list';
 import PropTypes from 'prop-types';
 import XDate from 'xdate';
+import moment from "moment";
 
 import styleConstructor from './style';
 import asCalendarConsumer from './asCalendarConsumer';
@@ -125,8 +127,25 @@ class AgendaList extends Component {
     const todayString = XDate.locales[XDate.defaultLocale].today || commons.todayString;
     const sectionTitle = date === today ? `${todayString.toUpperCase()}, ${date}` : date;
     
+    // return (
+    //   <Text allowFontScaling={false} style={[this.style.sectionText, this.props.sectionStyle]} onLayout={this.onHeaderLayout}>{sectionTitle}</Text>
+    // );
+
+    const qualifier = moment(title).calendar(null, {
+      sameDay: '[Today]',
+      nextDay: '[Tomorrow]',
+      nextWeek: '[]',
+      lastDay: '[Yesterday]',
+      lastWeek: '[]',
+      sameElse: '[]'
+    });
+
     return (
-      <Text allowFontScaling={false} style={[this.style.sectionText, this.props.sectionStyle]} onLayout={this.onHeaderLayout}>{sectionTitle}</Text>
+      <View style={this.props.sectionViewStyle}>
+        <Text allowFontScaling={false} style={[this.style.sectionText, this.props.sectionStyle]} onLayout={this.onHeaderLayout}>
+          {qualifier && <Text style={{fontWeight: "700"}}>{qualifier}</Text>} 
+          {qualifier && <Text> &bull; </Text>}{moment(title).format("dddd, MMMM D")}</Text>
+      </View>
     );
   }
 
