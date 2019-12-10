@@ -265,7 +265,7 @@ class ExpandableCalendar extends Component {
 
         this._weekCalendarStyles.style.opacity = Math.min(1, Math.max(1 - gestureState.dy / 100, 0));
       } else if (this.state.position === POSITIONS.MIN) {
-        this._weekCalendarStyles.style.opacity = this._wrapperStyles.style.height <= this.closedHeight ? 1 : Math.min(1, Math.max(1 - gestureState.dy / 100, 0));
+        this._weekCalendarStyles.style.opacity = this._wrapperStyles.style.height < this.closedHeight ? 0 : Math.min(1, Math.max(1 - gestureState.dy / 100, 0));
       }
     }
 
@@ -470,8 +470,9 @@ class ExpandableCalendar extends Component {
     const {style, hideKnob, horizontal, allowShadow, theme} = this.props;
     const {deltaY, position} = this.state;
     const isOpen = position === POSITIONS.OPEN;
+    const isMin = position === POSITIONS.MIN;
     const themeObject = Object.assign(this.headerStyleOverride, theme);
-
+    console.log(deltaY);
     return (
       <View style={[allowShadow && this.style.containerShadow, style]}>
         <Animated.View 
@@ -479,7 +480,7 @@ class ExpandableCalendar extends Component {
           style={{height: deltaY}} 
           {...this.panResponder.panHandlers}
         >
-          <CalendarList
+          {!isMin && <CalendarList
             testID="calendar"
             {...this.props}
             theme={themeObject}
@@ -496,7 +497,7 @@ class ExpandableCalendar extends Component {
             hideExtraDays={!horizontal}
             renderArrow={this.renderArrow}
             staticHeader
-          /> 
+          />}
           {horizontal && this.renderWeekCalendar()}
           {!horizontal && this.renderHeader()}
           {!hideKnob && this.renderKnob()}
