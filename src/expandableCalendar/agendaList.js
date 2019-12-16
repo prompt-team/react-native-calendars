@@ -1,14 +1,13 @@
 import _ from 'lodash';
 import React, {Component} from 'react';
-import {Text, View} from 'react-native';
-import {SectionList} from 'react-native-two-way-list';
+import {SectionList, Text, View} from 'react-native';
+import sectionListGetItemLayout from 'react-native-section-list-get-item-layout';
 import PropTypes from 'prop-types';
 import XDate from 'xdate';
 import moment from "moment";
 
 import styleConstructor from './style';
 import asCalendarConsumer from './asCalendarConsumer';
-
 
 const commons = require('./commons');
 const UPDATE_SOURCES = commons.UPDATE_SOURCES;
@@ -58,6 +57,11 @@ class AgendaList extends Component {
       }
     });
     return i;
+  }
+
+  componentDidMount() {
+    const sectionIndex = this.getSectionIndex(XDate().toString('yyyy-MM-dd'));
+    this.scrollToSection(sectionIndex);
   }
 
   componentDidUpdate(prevProps) {
@@ -166,14 +170,20 @@ class AgendaList extends Component {
         onMomentumScrollBegin={this.onMomentumScrollBegin}
         onMomentumScrollEnd={this.onMomentumScrollEnd}
         // onScrollToIndexFailed={(info) => { console.warn('onScrollToIndexFailed info: ', info); }}
-        // getItemLayout={this.getItemLayout} // onViewableItemsChanged is not updated when list scrolls!!!
+        getItemLayout={this.getItemLayout} // onViewableItemsChanged is not updated when list scrolls!!!
       />
     );
   }
 
   // getItemLayout = (data, index) => {
+  //   // console.log(data);
+  //   console.log(index);
   //   return {length: commons.screenWidth, offset: commons.screenWidth  * index, index};
   // }
+  getItemLayout = sectionListGetItemLayout({
+    getItemHeight: (rowData, sectionIndex, rowIndex) => 58,
+    getSectionHeaderHeight: () => 36, // The height of your section headers
+  });
 }
 
 export default asCalendarConsumer(AgendaList);

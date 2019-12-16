@@ -5,6 +5,7 @@ import {
   Animated,
   View,
   Text,
+  TouchableOpacity,
   Image
 } from 'react-native';
 import PropTypes from 'prop-types';
@@ -305,6 +306,17 @@ class ExpandableCalendar extends Component {
     }
   }
 
+  getNextPosition() {
+    switch(this.state.position) {
+      case POSITIONS.MIN:
+          return this.openHeight;
+      case POSITIONS.CLOSED:
+        return this.minHeight;
+      default:
+        return this.closedHeight;
+    };
+  }
+
   onAnimatedFinished = ({finished}) => {
     if (finished) {
       // this.setPosition();
@@ -447,9 +459,9 @@ class ExpandableCalendar extends Component {
   renderKnob() {
     // TODO: turn to TouchableOpacity with onPress that closes it
     return (
-      <View style={this.style.knobContainer} pointerEvents={'none'}>
+      <TouchableOpacity activeOpacity={1.0} style={this.style.knobContainer} pointerEvents={'none'} onPress={() => this.bounceToPosition(this.getNextPosition())}>
         <View style={this.style.knob} testID={CALENDAR_KNOB}/>
-      </View>
+      </TouchableOpacity>
     );
   }
 

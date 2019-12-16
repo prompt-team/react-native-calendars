@@ -36,6 +36,7 @@
     "react-native": "0.61.4",
     "react-native-navigation": "^3.5.1",
     "react-native-two-way-list": "^1.1.0",
+    "react-native-section-list-get-item-layout": "^2.2.3",
     "semver": "5.x.x",
     "shell-utils": "1.x.x"
   }
