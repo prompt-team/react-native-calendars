@@ -147,8 +147,9 @@ class AgendaList extends Component {
     return (
       <View style={this.props.sectionViewStyle}>
         <Text allowFontScaling={false} style={[this.style.sectionText, this.props.sectionStyle]} onLayout={this.onHeaderLayout}>
-          {qualifier && <Text style={{fontWeight: "700"}}>{qualifier}</Text>} 
-          {qualifier && <Text> &bull; </Text>}{moment(title).format("dddd, MMMM D")}</Text>
+          <Text style={{fontWeight: "700"}}>{qualifier ? qualifier : moment(title).format("dddd")} </Text>
+          &bull; {moment(title).format("MMMM D")}
+        </Text>
       </View>
     );
   }
@@ -175,11 +176,6 @@ class AgendaList extends Component {
     );
   }
 
-  // getItemLayout = (data, index) => {
-  //   // console.log(data);
-  //   console.log(index);
-  //   return {length: commons.screenWidth, offset: commons.screenWidth  * index, index};
-  // }
   getItemLayout = sectionListGetItemLayout({
     getItemHeight: (rowData, sectionIndex, rowIndex) => 58,
     getSectionHeaderHeight: () => 36, // The height of your section headers
