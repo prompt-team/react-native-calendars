@@ -23,9 +23,10 @@
   "license": "MIT",
   "dependencies": {
     "lodash": "^4.0.0",
+    "moment": "^2.24.0",
     "prop-types": "^15.5.10",
-    "xdate": "^0.8.0",
-    "moment": "^2.24.0"
+    "react-navigation": "^4.0.10",
+    "xdate": "^0.8.0"
   },
   "devDependencies": {
     "babel-eslint": "^7.2.3",

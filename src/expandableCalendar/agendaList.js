@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import React, {Component} from 'react';
-import {SectionList, Text, View} from 'react-native';
+import { Text, View} from 'react-native';
+import { SectionList } from 'react-navigation';
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout';
 import PropTypes from 'prop-types';
 import XDate from 'xdate';
@@ -176,10 +177,10 @@ class AgendaList extends Component {
     );
   }
 
-  getItemLayout = sectionListGetItemLayout({
-    getItemHeight: (rowData, sectionIndex, rowIndex) => 58,
-    getSectionHeaderHeight: () => 36, // The height of your section headers
-  });
+  // getItemLayout = sectionListGetItemLayout({
+  //   getItemHeight: (rowData, sectionIndex, rowIndex) => 58,
+  //   getSectionHeaderHeight: () => 36, // The height of your section headers
+  // });
 }
 
 export default asCalendarConsumer(AgendaList);
