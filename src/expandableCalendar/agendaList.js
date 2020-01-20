@@ -164,7 +164,7 @@ class AgendaList extends Component {
         ref={this.list}
         keyExtractor={this.keyExtractor}
         showsVerticalScrollIndicator={false}
-        stickySectionHeadersEnabled
+        // stickySectionHeadersEnabled
         onViewableItemsChanged={this.onViewableItemsChanged}
         viewabilityConfig={this.viewabilityConfig}
         renderSectionHeader={this.renderSectionHeader}
