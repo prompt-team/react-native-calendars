@@ -164,7 +164,7 @@ class AgendaList extends Component {
         ref={this.list}
         keyExtractor={this.keyExtractor}
         showsVerticalScrollIndicator={false}
-        // stickySectionHeadersEnabled
+        stickySectionHeadersEnabled
         onViewableItemsChanged={this.onViewableItemsChanged}
         viewabilityConfig={this.viewabilityConfig}
         renderSectionHeader={this.renderSectionHeader}
@@ -172,7 +172,7 @@ class AgendaList extends Component {
         onMomentumScrollBegin={this.onMomentumScrollBegin}
         onMomentumScrollEnd={this.onMomentumScrollEnd}
         // onScrollToIndexFailed={(info) => { console.warn('onScrollToIndexFailed info: ', info); }}
-        getItemLayout={this.getItemLayout} // onViewableItemsChanged is not updated when list scrolls!!!
+        // getItemLayout={this.getItemLayout} // onViewableItemsChanged is not updated when list scrolls!!!
       />
     );
   }
