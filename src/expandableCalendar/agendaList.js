@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import React, {Component} from 'react';
-import { Text, View} from 'react-native';
-import { SectionList } from 'react-navigation';
+import { Text, View, SectionList} from 'react-native';
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout';
 import PropTypes from 'prop-types';
 import XDate from 'xdate';
@@ -171,7 +170,7 @@ class AgendaList extends Component {
         onScroll={this.onScroll}
         onMomentumScrollBegin={this.onMomentumScrollBegin}
         onMomentumScrollEnd={this.onMomentumScrollEnd}
-        // onScrollToIndexFailed={(info) => { console.warn('onScrollToIndexFailed info: ', info); }}
+        onScrollToIndexFailed={(info) => { console.warn('onScrollToIndexFailed info: ', info); }}
         // getItemLayout={this.getItemLayout} // onViewableItemsChanged is not updated when list scrolls!!!
       />
     );
