@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import React, {Component} from 'react';
-import { Text, View, SectionList} from 'react-native';
+import { Text, View, SectionList } from 'react-native';
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout';
 import PropTypes from 'prop-types';
 import XDate from 'xdate';

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import React, {Component} from 'react';
-import { Dimensions, Text, View, SectionList } from 'react-native';
+import { Dimensions, Text, View, RefreshControl, SectionList } from 'react-native';
 import { RecyclerListView, DataProvider, LayoutProvider } from "recyclerlistview";
 import PropTypes from 'prop-types';
 import XDate from 'xdate';
@@ -14,13 +14,16 @@ const UPDATE_SOURCES = commons.UPDATE_SOURCES;
 
 const ViewTypes = {
   DATE: 0,
-  EVENTS: 1
+  EMPTY_DAY: 1,
+  BASIC_EVENT: 2,
+  DETAILED_EVENT: 3,
+  MULTI_EVENTS: 4,
 };
 
-const GenerateDateArray = (start, end) => (
+const GenerateDateArray = (start, end, events = {}) => (
   _.flatten(_.map(_.range(start.diffDays(end)), 
                   (dayIdx) => [ ({ title: start.clone().addDays(dayIdx).toString('yyyy-MM-dd'), type: "header" }),
-                                ({ title: start.clone().addDays(dayIdx).toString('yyyy-MM-dd'), data: [{}], type: "events" }) 
+                                ({ title: start.clone().addDays(dayIdx).toString('yyyy-MM-dd'), data: events[start.clone().addDays(dayIdx).toString('yyyy-MM-dd')] || [{}], type: "events" }) 
                               ] ))
 );
 
@@ -37,6 +40,12 @@ class AgendaList extends Component {
     // ...RecyclerListView.propTypes,
     /** day format in section title. Formatting values: http://arshaw.com/xdate/#Formatting */
     dayFormat: PropTypes.string,
+    agendaEvents: PropTypes.object,
+    width: PropTypes.number,
+    headerHeight: PropTypes.number,
+    emptyDayHeight: PropTypes.number,
+    eventHeight: PropTypes.number,
+    profileHeight: PropTypes.number
     /** style passed to the section view */
     // sectionStyle: PropTypes.oneOfType([PropTypes.object, PropTypes.number, PropTypes.array])
   }
@@ -64,60 +73,110 @@ class AgendaList extends Component {
     const start = new XDate().addDays(-10);
     const end = new XDate().addDays(30);
 
+    this.inProgress = false;
+
+    const agenda = GenerateDateArray(start, end, this.props.agendaEvents);
+    this.state = {
+      dataProvider: dataProvider.cloneWithRows(agenda),
+      agenda,
+      count: 0,
+      viewType: 0,
+      loading: false,
+    };
+
     this._layoutProvider = new LayoutProvider(
       index => {
         if (index % 2 === 0) return ViewTypes.DATE;
-        else return ViewTypes.EVENTS;
+        const {data} = this.state.dataProvider.getDataForIndex(index);
+        if (data && data.length === 0) return ViewTypes.EMPTY_DAY;
+
+        return ViewTypes.BASIC_EVENT;
       },
-      (type, dim) => {
-        let { width } = Dimensions.get("window");
+      (type, dim, index) => {
+        // let { width } = Dimensions.get("window");
+        let { width, headerHeight, emptyDayHeight, eventHeight, profileHeight } = this.props;
+        const {data} = this.state.dataProvider.getDataForIndex(index);
+
         switch (type) {
           case ViewTypes.DATE:
               dim.width = width;
-              dim.height = 42.5;
+              dim.height = headerHeight;
               break;
-          case ViewTypes.EVENTS:
+          case ViewTypes.EMPTY_DAY:
               dim.width = width;
-              dim.height = 40;
+              dim.height = emptyDayHeight;
               break;
+          case ViewTypes.BASIC_EVENT:
+            dim.width = width;
+            if (data[0] && data[0].attendees && data[0].attendees.length > 0) dim.height = eventHeight + profileHeight - 1;
+            else dim.height = eventHeight - 1;
+            break;
+          case ViewTypes.MULTI_EVENTS:
+            dim.width = width;
+            let height = -1;
+            for (datum of data) {
+              if (datum && datum.attendees && datum.attendees.length > 0) height = height + eventHeight + profileHeight;
+              else height = height + eventHeight;
+            }
+            dim.height = height;//dataProvider.getDataForIndex(index).data.length;
+            break;
           default:
               dim.width = 0;
               dim.height = 0;
         }
       }
     );
-
-    this.state = {
-      dataProvider: dataProvider.cloneWithRows(GenerateDateArray(start, end)),
-      agenda: [],
-      count: 0,
-      viewType: 0,
-    };
-
-
-    // const start = new XDate().addDays(-1);
-    // const end = new XDate().addDays(30);
-  
-    // const [dates, dispatch] = useReducer((dates, action) => {
-    //   switch (action.type) {
-    //     case 'loadPast': 
-    //       const pastEnd = new XDate(dates[0].title);
-    //       const pastStart = new XDate(pastEnd).addDays(-30);
-    
-    //       return [ ...GenerateDateArray(pastStart, pastEnd), ...dates];
-    //     case 'loadFuture':
-    //       const futureStart = new XDate(dates[dates.length - 1].title).addDays(1);
-    //       const futureEnd = new XDate(futureStart).addDays(30);
-    
-    //       return [ ...dates, ...GenerateDateArray(futureStart, futureEnd) ];
-    //     default:
-    //       throw new Error();
-    //   }
-    // }, GenerateDateArray(start, end) );
-
-
   }
 
+  fetchPast = () => {
+    if (!this.inProgress) {
+      const pastEnd = new XDate(this.state.agenda[0].title);
+      const pastStart = new XDate(pastEnd).addDays(-30);
+      this.inProgress = true;
+      const pastAgenda = GenerateDateArray(pastStart, pastEnd, this.props.agendaEvents);
+      this.setState({
+        dataProvider: this.state.dataProvider.cloneWithRows(
+          pastAgenda.concat(this.state.agenda)
+        ),
+        agenda: pastAgenda.concat(this.state.agenda)
+      });
+      this.inProgress = false;
+    }
+  }
+
+  fetchFuture = () => {
+    if (!this.inProgress) {
+      const futureStart = new XDate(this.state.agenda[this.state.agenda.length - 1].title);
+      const futureEnd = new XDate(futureStart).addDays(30);
+      this.inProgress = true;
+      const futureAgenda = GenerateDateArray(futureStart, futureEnd, this.props.agendaEvents);
+      this.setState({
+        dataProvider: this.state.dataProvider.cloneWithRows(
+          this.state.agenda.concat(futureAgenda)
+        ),
+        agenda: this.state.agenda.concat(futureAgenda)
+      });
+      this.inProgress = false;
+    }
+  }
+
+  handleListEnd = () => {
+    this.fetchFuture();
+
+    //This is necessary to ensure that activity indicator inside footer gets rendered. This is required given the implementation I have done in this sample
+    this.setState({});
+  };
+  renderFooter = () => {
+    //Second view makes sure we don't unnecessarily change height of the list on this event. That might cause indicator to remain invisible
+    //The empty view can be removed once you've fetched all the data
+    return this.inProgress
+      ? <ActivityIndicator
+          style={{ margin: 10 }}
+          size="large"
+          color={'black'}
+        />
+      : <View style={{ height: 60 }} />;
+  };
   
 
   getSectionIndex(date) {
@@ -154,7 +213,8 @@ class AgendaList extends Component {
 
 
   onViewableItemsChanged = (all, now, notNow) => {
-    if (viewableItems && !this.sectionScroll) {
+    // console.log(now);
+    if (now && !this.sectionScroll) {
       const topSection =  _.get(this.state.dataProvider.getDataForIndex(now[0]), 'title');
       if (topSection && topSection !== this._topSection) {
         this._topSection = topSection;
@@ -195,7 +255,9 @@ class AgendaList extends Component {
   render() {
     return (
       <RecyclerListView
-        {...this.props}
+        // {...this.props}
+        rowRenderer={this.props.rowRenderer}
+        style={{ flex: 1 }}
         ref={rlv => this.list = rlv}
         layoutProvider={this._layoutProvider}
         dataProvider={this.state.dataProvider}
@@ -203,10 +265,23 @@ class AgendaList extends Component {
         initialRenderIndex={20}
         onVisibleIndicesChanged={this.onViewableItemsChanged}
         onScroll={this.onScroll}
+        onEndReached={this.handleListEnd}
+        renderFooter={this.renderFooter}
         scrollViewProps={{
           onMomentumScrollBegin: this.onMomentumScrollBegin,
           onMomentumScrollEnd: this.onMomentumScrollEnd,
-          onScrollToTop: () => console.log("AT TOPP")
+          onScrollToTop: () => console.log("AT TOPP"),
+          refreshControl: (
+            <RefreshControl
+              refreshing={this.state.loading}
+              onRefresh={() => {
+                this.setState({ loading: true });
+                this.fetchPast();
+                this.list.scrollToIndex(60);
+                this.setState({ loading: false });
+              }}
+            />
+          )
         }}
       />
     );
