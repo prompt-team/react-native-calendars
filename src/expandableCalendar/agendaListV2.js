@@ -24,8 +24,6 @@ const GenerateDateArray = (start, end) => (
                               ] ))
 );
 
-
-
 /**
  * @description: AgendaList component
  * @extends: SectionList
@@ -36,11 +34,11 @@ class AgendaList extends Component {
   static displayName = 'AgendaList';
 
   static propTypes = {
-    ...RecyclerListView.propTypes,
+    // ...RecyclerListView.propTypes,
     /** day format in section title. Formatting values: http://arshaw.com/xdate/#Formatting */
     dayFormat: PropTypes.string,
     /** style passed to the section view */
-    sectionStyle: PropTypes.oneOfType([PropTypes.object, PropTypes.number, PropTypes.array])
+    // sectionStyle: PropTypes.oneOfType([PropTypes.object, PropTypes.number, PropTypes.array])
   }
 
   static defaultProps = {
