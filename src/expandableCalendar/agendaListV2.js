@@ -198,7 +198,7 @@ class AgendaList extends Component {
         {...this.props}
         ref={rlv => this.list = rlv}
         layoutProvider={this._layoutProvider}
-        dataProvider={this.dataProvider}
+        dataProvider={this.state.dataProvider}
         forceNonDeterministicRendering
         initialRenderIndex={20}
         onVisibleIndicesChanged={this.onViewableItemsChanged}
